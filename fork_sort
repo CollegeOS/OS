@@ -1,0 +1,68 @@
+#include <stdio.h>
+#include <unistd.h>
+#include <sys/types.h>
+#include <sys/wait.h>
+
+void do_child(int arr[], int size) {
+    for (int i = 0; i < size - 1; i++) {
+        for (int j = i + 1; j < size; j++) {
+            if (arr[i] > arr[j]) {
+                int temp = arr[i];
+                arr[i] = arr[j];
+                arr[j] = temp;
+            }
+        }
+    }
+
+    printf("Child Process - Ascending Order: ");
+    for (int i = 0; i < size; i++) {
+        printf("%d ", arr[i]);
+    }
+    printf("\n");
+}
+
+void do_parent(int arr[], int size) {
+    for (int i = 0; i < size - 1; i++) {
+        for (int j = i + 1; j < size; j++) {
+            if (arr[i] < arr[j]) {
+                int temp = arr[i];
+                arr[i] = arr[j];
+                arr[j] = temp;
+            }
+        }
+    }
+
+    printf("Parent Process - Descending Order: ");
+    for (int i = 0; i < size; i++) {
+        printf("%d ", arr[i]);
+    }
+    printf("\n");
+}
+
+int main() {
+    int arr[50], size, i;
+
+    printf("Enter the size of the array: ");
+    scanf("%d", &size);
+
+    printf("Enter array elements: ");
+    for (i = 0; i < size; i++) {
+        scanf("%d", &arr[i]);
+    }
+
+    int x = fork();
+
+    if (x == -1) {
+        perror("Fork failed");
+        return 1;
+    }
+
+    if (x == 0) {
+        do_child(arr, size);
+    } else {
+        wait(NULL);
+        do_parent(arr, size);
+    }
+
+    return 0;
+}
