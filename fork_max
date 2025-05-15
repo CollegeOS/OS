@@ -1,0 +1,60 @@
+#include <stdio.h>
+#include <unistd.h>
+#include <sys/types.h>
+#include <sys/wait.h>  // for wait()
+
+int do_parent(int arr[], int z) {
+    int max = arr[0], i;
+    for (i = 1; i < z; i++) {
+        if(arr[i] > max) {
+            max = arr[i];
+        }
+    }
+    return max;
+}
+
+int do_child(int arr[], int z) {
+    int min = arr[0], i;
+    for (i = 1; i < z; i++) {
+        if(arr[i] < min) {
+            min = arr[i];
+        }
+    }
+    return min;
+}
+
+int main() {
+    int x;
+    int arr[50], z, i;
+
+    printf("Enter the size of array: ");
+    scanf("%d", &z);
+
+    printf("Enter array elements: ");
+    for (i = 0; i < z; i++) {
+        scanf("%d", &arr[i]);
+    }
+
+    x = fork();  // Create a child process
+
+    if (x == -1) {
+        // Handle error if fork fails
+        perror("Fork failed");
+        return 1;
+    }
+
+    if (x == 0) {
+        // Child process: Compute and print the minimum value
+        int m = do_child(arr, z);
+        printf("Child Process - Minimum is: %d\n", m);
+    } else {
+        // Parent process: Compute and print the maximum value
+        int max = do_parent(arr, z);
+        printf("Parent Process - Maximum is: %d\n", max);
+
+        // Wait for the child process to finish
+        wait(NULL);  // Parent waits for child to finish
+    }
+
+    return 0;
+}
